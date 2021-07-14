@@ -2,6 +2,9 @@ extends Actor
 
 export var stomp_impulse: = 1000.0
 
+onready var animation_player: = $AnimationPlayer
+onready var sprite = $player
+
 func _on_EnemyDetector_area_entered(area):
 	_velocity = calculate_stomp_velocity(_velocity, stomp_impulse)
 
@@ -13,12 +16,23 @@ func _physics_process(delta):
 	var direction: = get_direction()
 	_velocity = calculate_move_velocity(_velocity, direction, speed, is_jump_interrupted)
 	_velocity = move_and_slide(_velocity, FLOOR_NORMAL)
+	
+	if direction.x > 0:
+		sprite.set_flip_h(false)
+	elif direction.x < 0:
+		sprite.set_flip_h(true)
+		
+	var animation = get_animation()
+	animation_player.play(animation)
+	
 
 func get_direction() -> Vector2:
-	return  Vector2(
+	var direction: = Vector2(
 		Input.get_action_strength("move_right") - Input.get_action_strength("move_left"),
 		-1.0 if Input.is_action_just_pressed("jump") and is_on_floor() else 0.0
 	)
+		
+	return direction
 
 func calculate_move_velocity(	
 	linear_velocity: Vector2, 
@@ -42,3 +56,22 @@ func calculate_stomp_velocity(linear_velocity: Vector2, impulse: float) -> Vecto
 	var new_velocity: = linear_velocity
 	new_velocity.y = -impulse
 	return new_velocity
+
+func get_animation():
+	var animation: = ""
+	
+	if is_on_floor():
+		if _velocity.x != 0.0:
+			animation = "walk"
+		else:
+			animation ="idle"
+	else:
+		if _velocity.y > 0.0:
+			animation = "falling"
+		else:
+			animation = "jumping"
+		
+	return animation
+	
+	
+	
