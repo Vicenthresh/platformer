@@ -5,8 +5,12 @@ export var stomp_impulse: = 1000.0
 onready var animation_player: = $AnimationPlayer
 onready var sprite: = $player
 onready var collision_shape_2d: = $CollisionShape2D
+onready var dash_timer:= $DashTimer
+onready var dash_cd_timer:= $DashCd
 
-var wall_jump_velocity: = Vector2(-5.0, -1.0)
+var wall_jump_velocity: = Vector2(-4.0, -1.0)
+var max_speed: = 2000
+var dash_cd = false
 
 func _on_EnemyDetector_area_entered(area):
 	_velocity = calculate_stomp_velocity(_velocity, stomp_impulse)
@@ -15,12 +19,24 @@ func _on_EnemyDetector_body_entered(body):
 	hide()  # Player disappears after being hit.
 	collision_shape_2d.set_deferred("disabled", true)
 	queue_free()
-	
+
+func _on_DashTimer_timeout():
+	speed.x = 700
+	speed.y = 1200
+	gravity = 3000
+	collision_shape_2d.set_deferred("disabled", false)
+
+func _on_DashCd_timeout():
+	dash_cd = false
+
 func _physics_process(delta):
 	var is_jump_interrupted: = Input.is_action_just_released("jump") and _velocity.y < 0.0
+	var is_dashing: = false
 	var direction: = get_direction()
 	
 	_velocity = calculate_move_velocity(_velocity, direction, speed, is_jump_interrupted)
+	
+	
 	_velocity = move_and_slide(_velocity, FLOOR_NORMAL)
 	
 	if direction.x > 0:
@@ -41,11 +57,20 @@ func get_direction() -> Vector2:
 		if is_on_floor():
 			direction.y = -1.0
 		elif is_on_wall():
-			direction.x *= wall_jump_velocity.x 
+			direction.x *= wall_jump_velocity.x
 			direction.y = wall_jump_velocity.y
 		else:
 			direction.y = 0.0
-		   
+	
+	if Input.is_action_just_pressed("dash") and not dash_cd:
+		speed.x *= 4.0
+		speed.y = 0.0
+		gravity = 0.0
+		
+		dash_cd = true
+		dash_timer.start()
+		dash_cd_timer.start()
+		
 	return direction
 
 func calculate_move_velocity(	
@@ -79,18 +104,9 @@ func calculate_stomp_velocity(linear_velocity: Vector2, impulse: float) -> Vecto
 func get_animation():
 	var animation: = ""
 	
-	if is_on_floor():
-		if _velocity.x != 0.0:
-			animation = "walk"
-		else:
-			animation ="idle"
+	if _velocity.x != 0.0:
+		animation = "walk"
 	else:
-		if _velocity.y > 0.0:
-			animation = "falling"
-		else:
-			animation = "jumping"
+		animation ="idle"
 		
 	return animation
-	
-	
-	
