@@ -2,8 +2,6 @@ extends Actor
 
 export var stomp_impulse: = 1000.0
 
-onready var animation_player: = $AnimationPlayer
-onready var sprite: = $player
 onready var collision_shape_2d: = $CollisionShape2D
 onready var dash_timer:= $DashTimer
 onready var dash_cd_timer:= $DashCd
@@ -38,15 +36,6 @@ func _physics_process(delta):
 	
 	
 	_velocity = move_and_slide(_velocity, FLOOR_NORMAL)
-	
-	if direction.x > 0:
-		sprite.set_flip_h(false)
-	elif direction.x < 0:
-		sprite.set_flip_h(true)
-		
-	var animation = get_animation()
-	animation_player.play(animation)
-	
 
 func get_direction() -> Vector2:
 	var direction: = Vector2.ZERO
@@ -100,13 +89,3 @@ func calculate_stomp_velocity(linear_velocity: Vector2, impulse: float) -> Vecto
 	var new_velocity: = linear_velocity
 	new_velocity.y = -impulse
 	return new_velocity
-
-func get_animation():
-	var animation: = ""
-	
-	if _velocity.x != 0.0:
-		animation = "walk"
-	else:
-		animation ="idle"
-		
-	return animation

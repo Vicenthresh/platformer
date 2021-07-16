@@ -77,7 +77,10 @@ tile_data = PoolIntArray( 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 0, 5, 0, 0, 
 position = Vector2( 182, 840 )
 speed = Vector2( 700, 1200 )
 
-[node name="Camera2D" parent="Player" index="3"]
+[node name="player" parent="Player" index="0"]
+frame = 0
+
+[node name="Camera2D" parent="Player" index="2"]
 limit_right = 5000
 
 [node name="Enemy" parent="." instance=ExtResource( 3 )]
